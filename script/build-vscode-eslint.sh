@@ -1,20 +1,32 @@
 #!/bin/bash
 
+set -euo pipefail
+
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+TAG=release/3.0.16
+
+set -x
 
 # prepare
 mkdir -p $DIR/../tmp
 mkdir -p $DIR/../dist
 
-# clone
 cd $DIR/../tmp
-git clone --depth=1 git@github.com:Microsoft/vscode-eslint vscode-eslint
+if [[ ! -d $DIR/../tmp/vscode-eslint ]]; then
+  # clone
+  git clone --depth=1 --branch $TAG https://github.com/Microsoft/vscode-eslint vscode-eslint
 
-# pull
-cd $DIR/../tmp/vscode-eslint
-git clean -fd
-git checkout .
-git pull --rebase
+  # pull
+  cd $DIR/../tmp/vscode-eslint
+  git clean -fd
+  git checkout .
+  git pull --rebase
+else
+  cd $DIR/../tmp/vscode-eslint
+  git fetch origin --depth=1 $TAG
+  git checkout .
+  git checkout $TAG
+fi
 
 # npm install
 cd $DIR/../tmp/vscode-eslint
